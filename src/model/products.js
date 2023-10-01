@@ -1,6 +1,6 @@
 const db = require("../database/db.js");
 
-module.exports = { listProducts, searchProducts };
+module.exports = { listProducts, searchProducts, getProduct };
 
 const select_products = db.prepare(/*sql*/ `
     SELECT
@@ -18,7 +18,7 @@ function listProducts() {
     return select_products.all();
 }
 
-const search_products = db.prepare(/*sql*/`
+const search_products = db.prepare(/*sql*/ `
     SELECT
         id,
         name
@@ -28,4 +28,19 @@ const search_products = db.prepare(/*sql*/`
 
 function searchProducts(search_term) {
     return search_products.all(`%${search_term}%`);
+}
+
+const select_product = db.prepare(/*sql*/`
+    SELECT
+        products.id,
+        products.name,
+        categories.name AS category_name,
+        categories.description AS category_description
+    FROM products
+    JOIN categories ON products.category_id = categories.id
+    WHERE products.id = ?
+`);
+
+function getProduct(id) {
+    return select_product.get(id);
 }
